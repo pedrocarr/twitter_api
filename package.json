@@ -1,0 +1,19 @@
+{
+  "name": "twitter_api",
+  "version": "1.0.0",
+  "description": "simple project to get used to twitter api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedrocarr/twitter_api.git"
+  },
+  "author": "Pedro Henrique Silva Carvalho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pedrocarr/twitter_api/issues"
+  },
+  "homepage": "https://github.com/pedrocarr/twitter_api#readme"
+}
