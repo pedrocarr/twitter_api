@@ -1,5 +1,6 @@
 import { AuthenticationError } from '@/domain/errors'
 import { TwitterAuthentication } from '@/domain/features'
+import { LoadTwitterUserApi } from '@/data/contracts/apis'
 
 class TwitterAuthenticationService {
   constructor (
@@ -10,18 +11,6 @@ class TwitterAuthenticationService {
     await this.loadTwitterUserApi.loadUser(params)
     return new AuthenticationError()
   }
-}
-
-interface LoadTwitterUserApi {
-  loadUser: (params: LoadTwitterUserApi.Params) => Promise<LoadTwitterUserApi.Result>
-}
-
-namespace LoadTwitterUserApi {
-  export type Params = {
-    token: string
-  }
-
-  export type Result = undefined
 }
 
 class LoadTwitterUserApiSpy implements LoadTwitterUserApi {
