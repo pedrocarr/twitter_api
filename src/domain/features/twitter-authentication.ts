@@ -5,7 +5,7 @@ export interface TwitterAuthentication {
   perform: (params: TwitterAuthentication.Params) => Promise<TwitterAuthentication.Result>
 }
 
-namespace TwitterAuthentication {
+export namespace TwitterAuthentication {
   export type Params = {
     token: string
   }
