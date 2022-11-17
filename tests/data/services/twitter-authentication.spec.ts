@@ -1,12 +1,23 @@
 import { AuthenticationError } from '@/domain/errors'
 import { TwitterAuthenticationService } from '@/data/services'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
-import { mock } from 'jest-mock-extended'
+import { mock, MockProxy } from 'jest-mock-extended'
+
+type SutTypes = {
+  sut: TwitterAuthenticationService
+  loadTwitterUserApi: MockProxy<LoadTwitterUserApi>
+}
+
+const makeSut = (): SutTypes => {
+  const loadTwitterUserApi = mock<LoadTwitterUserApi>()
+  const sut = new TwitterAuthenticationService(loadTwitterUserApi)
+  return { sut, loadTwitterUserApi }
+}
 
 describe('TwitterAuthenticationService', () => {
   it('should call LoadTwitterUserApi with the correct parameters', async () => {
-    const loadTwitterUserApi = mock<LoadTwitterUserApi>()
-    const sut = new TwitterAuthenticationService(loadTwitterUserApi)
+    const { sut, loadTwitterUserApi } = makeSut()
+
     await sut.perform({ token: 'any_token' })
 
     expect(loadTwitterUserApi.loadUser).toHaveBeenCalledWith({ token: 'any_token' })
@@ -14,9 +25,8 @@ describe('TwitterAuthenticationService', () => {
   })
 
   it('should return AuthenticationError when LoadTwitterUserApi returns undefined', async () => {
-    const loadTwitterUserApi = mock<LoadTwitterUserApi>()
+    const { sut, loadTwitterUserApi } = makeSut()
     loadTwitterUserApi.loadUser.mockResolvedValueOnce(undefined)
-    const sut = new TwitterAuthenticationService(loadTwitterUserApi)
 
     const authResult = await sut.perform({ token: 'any_token' })
 
