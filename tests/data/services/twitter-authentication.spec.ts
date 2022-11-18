@@ -1,12 +1,12 @@
 import { AuthenticationError } from '@/domain/errors'
 import { TwitterAuthenticationService } from '@/data/services'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
-import { CreateTwitterAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repos'
+import { CreateTwitterAccountRepository, LoadUserAccountRepository, UpdateTwitterAccountRepository } from '@/data/contracts/repos'
 import { mock, MockProxy } from 'jest-mock-extended'
 
 describe('TwitterAuthenticationService', () => {
   let twitterApi: MockProxy<LoadTwitterUserApi>
-  let userAccountRepo: MockProxy<LoadUserAccountRepository & CreateTwitterAccountRepository>
+  let userAccountRepo: MockProxy<LoadUserAccountRepository & CreateTwitterAccountRepository & UpdateTwitterAccountRepository>
   let sut: TwitterAuthenticationService
   const token = 'any_token'
 
@@ -46,7 +46,7 @@ describe('TwitterAuthenticationService', () => {
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
 
-  it('should return CreateUserAccountRepo when LoadUserAccountRepo returns undefined', async () => {
+  it('should return CreateTwitterAccountRepo when LoadUserAccountRepo returns undefined', async () => {
     userAccountRepo.load.mockResolvedValueOnce(undefined)
     await sut.perform({ token })
 
@@ -56,5 +56,21 @@ describe('TwitterAuthenticationService', () => {
       twitterId: 'any_twitter_id'
     })
     expect(userAccountRepo.createFromTwitter).toHaveBeenCalledTimes(1)
+  })
+
+  it('should return UpdateTwitterAccountRepo when LoadUserAccountRepo returns undefined', async () => {
+    userAccountRepo.load.mockResolvedValueOnce({
+      id: 'any_id',
+      name: 'any_name'
+    })
+
+    await sut.perform({ token })
+
+    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledWith({
+      id: 'any_id',
+      name: 'any_name',
+      twitterId: 'any_twitter_id'
+    })
+    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledTimes(1)
   })
 })
