@@ -5,16 +5,15 @@ import { CreateTwitterAccountRepository, LoadUserAccountRepository } from '@/dat
 
 export class TwitterAuthenticationService {
   constructor (
-    private readonly loadTwitterUserApi: LoadTwitterUserApi,
-    private readonly loadUserAccountRepo: LoadUserAccountRepository,
-    private readonly createTwitterAccountRepo: CreateTwitterAccountRepository
+    private readonly twitterApi: LoadTwitterUserApi,
+    private readonly userAccountRepo: LoadUserAccountRepository & CreateTwitterAccountRepository
   ) {}
 
   async perform (params: TwitterAuthentication.Params): Promise<AuthenticationError> {
-    const twitterData = await this.loadTwitterUserApi.loadUser(params)
+    const twitterData = await this.twitterApi.loadUser(params)
     if (twitterData !== undefined) {
-      await this.loadUserAccountRepo.load({ email: twitterData.email })
-      await this.createTwitterAccountRepo.createFromTwitter(twitterData)
+      await this.userAccountRepo.load({ email: twitterData.email })
+      await this.userAccountRepo.createFromTwitter(twitterData)
     }
     return new AuthenticationError()
   }
