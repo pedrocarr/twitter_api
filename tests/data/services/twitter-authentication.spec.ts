@@ -18,7 +18,7 @@ describe('TwitterAuthenticationService', () => {
       twitterId: 'any_twitter_id'
     })
     userAccountRepo = mock()
-
+    userAccountRepo.load.mockResolvedValue(undefined)
     sut = new TwitterAuthenticationService(
       twitterApi,
       userAccountRepo
@@ -47,7 +47,6 @@ describe('TwitterAuthenticationService', () => {
   })
 
   it('should return CreateTwitterAccountRepo when LoadUserAccountRepo returns undefined', async () => {
-    userAccountRepo.load.mockResolvedValueOnce(undefined)
     await sut.perform({ token })
 
     expect(userAccountRepo.createFromTwitter).toHaveBeenCalledWith({
@@ -69,6 +68,21 @@ describe('TwitterAuthenticationService', () => {
     expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledWith({
       id: 'any_id',
       name: 'any_name',
+      twitterId: 'any_twitter_id'
+    })
+    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledTimes(1)
+  })
+
+  it('should update account name', async () => {
+    userAccountRepo.load.mockResolvedValueOnce({
+      id: 'any_id'
+    })
+
+    await sut.perform({ token })
+
+    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledWith({
+      id: 'any_id',
+      name: 'any_twitter_name',
       twitterId: 'any_twitter_id'
     })
     expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledTimes(1)

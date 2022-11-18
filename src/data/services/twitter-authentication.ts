@@ -13,10 +13,10 @@ export class TwitterAuthenticationService {
     const twitterData = await this.twitterApi.loadUser(params)
     if (twitterData !== undefined) {
       const accountData = await this.userAccountRepo.load({ email: twitterData.email })
-      if (accountData?.name !== undefined) {
+      if (accountData !== undefined) {
         await this.userAccountRepo.updateWithTwitter({
           id: accountData.id,
-          name: accountData.name,
+          name: accountData.name ?? twitterData.name,
           twitterId: twitterData.twitterId
         })
       } else {
