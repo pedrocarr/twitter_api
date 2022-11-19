@@ -1,12 +1,12 @@
 import { AuthenticationError } from '@/domain/errors'
 import { TwitterAuthenticationService } from '@/data/services'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
-import { CreateTwitterAccountRepository, LoadUserAccountRepository, UpdateTwitterAccountRepository } from '@/data/contracts/repos'
+import { SaveTwitterAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repos'
 import { mock, MockProxy } from 'jest-mock-extended'
 
 describe('TwitterAuthenticationService', () => {
   let twitterApi: MockProxy<LoadTwitterUserApi>
-  let userAccountRepo: MockProxy<LoadUserAccountRepository & CreateTwitterAccountRepository & UpdateTwitterAccountRepository>
+  let userAccountRepo: MockProxy<LoadUserAccountRepository & SaveTwitterAccountRepository>
   let sut: TwitterAuthenticationService
   const token = 'any_token'
 
@@ -38,26 +38,23 @@ describe('TwitterAuthenticationService', () => {
 
     expect(authResult).toEqual(new AuthenticationError())
   })
-
-  it('should return LoadUserAccountRepo when LoadTwitterUserApi returns data', async () => {
+  it('should call LoadUserAccountRepo when LoadTwitterUserApi returns data', async () => {
     await sut.perform({ token })
 
     expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_twitter_email' })
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
-
-  it('should return CreateTwitterAccountRepo when LoadUserAccountRepo returns undefined', async () => {
+  it('should create account with twitter data', async () => {
     await sut.perform({ token })
 
-    expect(userAccountRepo.createFromTwitter).toHaveBeenCalledWith({
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
       email: 'any_twitter_email',
       name: 'any_twitter_name',
       twitterId: 'any_twitter_id'
     })
-    expect(userAccountRepo.createFromTwitter).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
   })
-
-  it('should return UpdateTwitterAccountRepo when LoadUserAccountRepo returns undefined', async () => {
+  it('should not update account name', async () => {
     userAccountRepo.load.mockResolvedValueOnce({
       id: 'any_id',
       name: 'any_name'
@@ -65,14 +62,14 @@ describe('TwitterAuthenticationService', () => {
 
     await sut.perform({ token })
 
-    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledWith({
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
       id: 'any_id',
       name: 'any_name',
+      email: 'any_twitter_email',
       twitterId: 'any_twitter_id'
     })
-    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
   })
-
   it('should update account name', async () => {
     userAccountRepo.load.mockResolvedValueOnce({
       id: 'any_id'
@@ -80,11 +77,12 @@ describe('TwitterAuthenticationService', () => {
 
     await sut.perform({ token })
 
-    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledWith({
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
       id: 'any_id',
       name: 'any_twitter_name',
+      email: 'any_twitter_email',
       twitterId: 'any_twitter_id'
     })
-    expect(userAccountRepo.updateWithTwitter).toHaveBeenCalledTimes(1)
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
   })
 })

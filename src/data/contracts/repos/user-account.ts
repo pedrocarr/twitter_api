@@ -14,27 +14,14 @@ export namespace LoadUserAccountRepository {
   }
 }
 
-export interface CreateTwitterAccountRepository {
-  createFromTwitter: (params: CreateTwitterAccountRepository.Params) => Promise<void>
-
+export interface SaveTwitterAccountRepository {
+  saveWithTwitter: (params: SaveTwitterAccountRepository.Params) => Promise<void>
 }
 
-export namespace CreateTwitterAccountRepository {
+export namespace SaveTwitterAccountRepository {
   export type Params = {
+    id?: string
     email: string
-    name: string
-    twitterId: string
-  }
-}
-
-export interface UpdateTwitterAccountRepository {
-  updateWithTwitter: (params: UpdateTwitterAccountRepository.Params) => Promise<void>
-
-}
-
-export namespace UpdateTwitterAccountRepository {
-  export type Params = {
-    id: string
     name: string
     twitterId: string
   }
