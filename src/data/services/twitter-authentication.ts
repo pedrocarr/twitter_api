@@ -6,20 +6,21 @@ import { SaveTwitterAccountRepository, LoadUserAccountRepository } from '@/data/
 import { TwitterAccount } from '@/domain/models/twitter-account'
 import { AccessToken } from '@/domain/models/access-token'
 
-export class TwitterAuthenticationService {
+export class TwitterAuthenticationService implements TwitterAuthentication {
   constructor (
     private readonly twitterApi: LoadTwitterUserApi,
     private readonly userAccountRepo: LoadUserAccountRepository & SaveTwitterAccountRepository,
     private readonly crypto: TokenGenerator
   ) {}
 
-  async perform (params: TwitterAuthentication.Params): Promise<AuthenticationError> {
+  async perform (params: TwitterAuthentication.Params): Promise<TwitterAuthentication.Result> {
     const twitterData = await this.twitterApi.loadUser(params)
     if (twitterData !== undefined) {
       const accountData = await this.userAccountRepo.load({ email: twitterData.email })
       const twitterAccount = new TwitterAccount(twitterData, accountData)
       const { id } = await this.userAccountRepo.saveWithTwitter(twitterAccount)
-      await this.crypto.generateToken({ key: id, expirationInMs: AccessToken.expirationInMs })
+      const token = await this.crypto.generateToken({ key: id, expirationInMs: AccessToken.expirationInMs })
+      return new AccessToken(token)
     }
     return new AuthenticationError()
   }
