@@ -4,6 +4,7 @@ import { TwitterAuthentication } from '@/domain/features'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
 import { SaveTwitterAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repos'
 import { TwitterAccount } from '@/domain/models/twitter-account'
+import { AccessToken } from '@/domain/models/access-token'
 
 export class TwitterAuthenticationService {
   constructor (
@@ -18,7 +19,7 @@ export class TwitterAuthenticationService {
       const accountData = await this.userAccountRepo.load({ email: twitterData.email })
       const twitterAccount = new TwitterAccount(twitterData, accountData)
       const { id } = await this.userAccountRepo.saveWithTwitter(twitterAccount)
-      await this.crypto.generateToken({ key: id })
+      await this.crypto.generateToken({ key: id, expirationInMs: AccessToken.expirationInMs })
     }
     return new AuthenticationError()
   }
