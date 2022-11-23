@@ -15,7 +15,7 @@ export namespace LoadUserAccountRepository {
 }
 
 export interface SaveTwitterAccountRepository {
-  saveWithTwitter: (params: SaveTwitterAccountRepository.Params) => Promise<void>
+  saveWithTwitter: (params: SaveTwitterAccountRepository.Params) => Promise<SaveTwitterAccountRepository.Result>
 }
 
 export namespace SaveTwitterAccountRepository {
@@ -24,5 +24,9 @@ export namespace SaveTwitterAccountRepository {
     email: string
     name: string
     twitterId: string
+  }
+
+  export type Result = {
+    id: string
   }
 }

@@ -3,6 +3,7 @@ import { TwitterAuthenticationService } from '@/data/services'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
 import { SaveTwitterAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repos'
 import { TwitterAccount } from '@/domain/models/twitter-account'
+import { TokenGenerator } from '@/data/contracts/crypto'
 
 import { mock, MockProxy } from 'jest-mock-extended'
 
@@ -10,6 +11,7 @@ jest.mock('@/domain/models/twitter-account')
 
 describe('TwitterAuthenticationService', () => {
   let twitterApi: MockProxy<LoadTwitterUserApi>
+  let crypto: MockProxy<TokenGenerator>
   let userAccountRepo: MockProxy<LoadUserAccountRepository & SaveTwitterAccountRepository>
   let sut: TwitterAuthenticationService
   const token = 'any_token'
@@ -23,9 +25,12 @@ describe('TwitterAuthenticationService', () => {
     })
     userAccountRepo = mock()
     userAccountRepo.load.mockResolvedValue(undefined)
+    userAccountRepo.saveWithTwitter.mockResolvedValueOnce({ id: 'any_account_id' })
+    crypto = mock()
     sut = new TwitterAuthenticationService(
       twitterApi,
-      userAccountRepo
+      userAccountRepo,
+      crypto
     )
   })
   it('should call LoadTwitterUserApi with the correct parameters', async () => {
@@ -57,5 +62,12 @@ describe('TwitterAuthenticationService', () => {
 
     expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({ any: 'any' })
     expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
+  })
+
+  it('should call TokenGenerator with correct params', async () => {
+    await sut.perform({ token })
+
+    expect(crypto.generateToken).toHaveBeenCalledWith({ key: 'any_account_id' })
+    expect(crypto.generateToken).toHaveBeenCalledTimes(1)
   })
 })
