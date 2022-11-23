@@ -2,7 +2,11 @@ import { AuthenticationError } from '@/domain/errors'
 import { TwitterAuthenticationService } from '@/data/services'
 import { LoadTwitterUserApi } from '@/data/contracts/apis'
 import { SaveTwitterAccountRepository, LoadUserAccountRepository } from '@/data/contracts/repos'
+import { TwitterAccount } from '@/domain/models/twitter-account'
+
 import { mock, MockProxy } from 'jest-mock-extended'
+
+jest.mock('@/domain/models/twitter-account')
 
 describe('TwitterAuthenticationService', () => {
   let twitterApi: MockProxy<LoadTwitterUserApi>
@@ -44,45 +48,14 @@ describe('TwitterAuthenticationService', () => {
     expect(userAccountRepo.load).toHaveBeenCalledWith({ email: 'any_twitter_email' })
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1)
   })
-  it('should create account with twitter data', async () => {
-    await sut.perform({ token })
 
-    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
-      email: 'any_twitter_email',
-      name: 'any_twitter_name',
-      twitterId: 'any_twitter_id'
-    })
-    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
-  })
-  it('should not update account name', async () => {
-    userAccountRepo.load.mockResolvedValueOnce({
-      id: 'any_id',
-      name: 'any_name'
-    })
+  it('should call SaveTwitterAccountRepository with TwitterAccount', async () => {
+    const TwitterAccountStub = jest.fn().mockImplementation(() => ({ any: 'any' }))
+    jest.mocked(TwitterAccount).mockImplementation(TwitterAccountStub)
 
     await sut.perform({ token })
 
-    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
-      id: 'any_id',
-      name: 'any_name',
-      email: 'any_twitter_email',
-      twitterId: 'any_twitter_id'
-    })
-    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
-  })
-  it('should update account name', async () => {
-    userAccountRepo.load.mockResolvedValueOnce({
-      id: 'any_id'
-    })
-
-    await sut.perform({ token })
-
-    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({
-      id: 'any_id',
-      name: 'any_twitter_name',
-      email: 'any_twitter_email',
-      twitterId: 'any_twitter_id'
-    })
+    expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledWith({ any: 'any' })
     expect(userAccountRepo.saveWithTwitter).toHaveBeenCalledTimes(1)
   })
 })
