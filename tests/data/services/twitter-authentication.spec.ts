@@ -81,4 +81,35 @@ describe('TwitterAuthenticationService', () => {
 
     expect(authResult).toEqual(new AccessToken('any_generated_token'))
   })
+  it('should rethrow if LoadTwitterUserApi throws', async () => {
+    twitterApi.loadUser.mockRejectedValueOnce(new Error('twitter_error'))
+
+    const promise = sut.perform({ token })
+
+    await expect(promise).rejects.toThrow(new Error('twitter_error'))
+  })
+
+  it('should rethrow if LoadUserAccountRepository throws', async () => {
+    userAccountRepo.load.mockRejectedValueOnce(new Error('load_error'))
+
+    const promise = sut.perform({ token })
+
+    await expect(promise).rejects.toThrow(new Error('load_error'))
+  })
+
+  it('should rethrow if SaveTwitterAccountRepository throws', async () => {
+    userAccountRepo.saveWithTwitter.mockRejectedValueOnce(new Error('save_error'))
+
+    const promise = sut.perform({ token })
+
+    await expect(promise).rejects.toThrow(new Error('save_error'))
+  })
+
+  it('should rethrow if TokenGenerator throws', async () => {
+    crypto.generateToken.mockRejectedValueOnce(new Error('token_error'))
+
+    const promise = sut.perform({ token })
+
+    await expect(promise).rejects.toThrow(new Error('token_error'))
+  })
 })
