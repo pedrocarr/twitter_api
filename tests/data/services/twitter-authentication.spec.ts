@@ -15,9 +15,10 @@ describe('TwitterAuthenticationService', () => {
   let crypto: MockProxy<TokenGenerator>
   let userAccountRepo: MockProxy<LoadUserAccountRepository & SaveTwitterAccountRepository>
   let sut: TwitterAuthenticationService
-  const token = 'any_token'
+  let token: string
 
-  beforeEach(() => {
+  beforeAll(() => {
+    token = 'any_token'
     twitterApi = mock()
     twitterApi.loadUser.mockResolvedValue({
       name: 'any_twitter_name',
@@ -29,6 +30,9 @@ describe('TwitterAuthenticationService', () => {
     userAccountRepo.saveWithTwitter.mockResolvedValue({ id: 'any_account_id' })
     crypto = mock()
     crypto.generateToken.mockResolvedValue('any_generated_token')
+  })
+
+  beforeEach(() => {
     sut = new TwitterAuthenticationService(
       twitterApi,
       userAccountRepo,
