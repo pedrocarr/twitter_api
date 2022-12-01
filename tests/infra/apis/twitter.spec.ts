@@ -1,37 +1,7 @@
-import { LoadTwitterUserApi } from '@/data/contracts/apis'
+import { TwitterApi } from '@/infra/api/twitter'
+import { HttpGetClient } from '@/infra/http'
+
 import { mock, MockProxy } from 'jest-mock-extended'
-
-class TwitterApi {
-  private readonly baseUrl = 'https://api.twitter.com'
-
-  constructor (
-    private readonly httpClient: HttpGetClient,
-    private readonly clientId: string,
-    private readonly clientSecret: string
-  ) {}
-
-  async loadUser (params: LoadTwitterUserApi.Params): Promise<void> {
-    await this.httpClient.get({
-      url: `${this.baseUrl}/oauth/authorize`,
-      params: {
-        client_id: this.clientId,
-        client_secret: this.clientSecret,
-        grant_type: 'client_credentials'
-      }
-    })
-  }
-}
-
-interface HttpGetClient {
-  get: (params: HttpGetClient.Params) => Promise<void>
-}
-
-namespace HttpGetClient {
-  export type Params = {
-    url: string
-    params: object
-  }
-}
 
 describe('TwitterApi', () => {
   let clientId: string
